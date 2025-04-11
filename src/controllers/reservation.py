@@ -1,8 +1,8 @@
 import logging
 from datetime import timedelta
-from sqlalchemy import select
+from sqlalchemy import select, or_, text, cast, Interval
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 
 from schemas.reservation import ReservationIN, ReservationDtlInfo
 from schemas.table import TableDtlInfo
@@ -39,9 +39,12 @@ class ReservationController:
             end_time = reservation.reservation_time + timedelta(minutes=reservation.duration_minutes)
 
             existing_reservations = await session.execute(select(Reservation).filter(
-                    Reservation.table_id == reservation.table_id,
-                    Reservation.reservation_time < end_time,
-                    (Reservation.reservation_time + timedelta(minutes=Reservation.duration_minutes)) > reservation.reservation_time
+                Reservation.table_id == reservation.table_id,
+                or_(
+                    Reservation.reservation_time.between(reservation.reservation_time, end_time),
+                    (Reservation.reservation_time +
+                     cast(Reservation.duration_minutes * text("interval '1 minute'"), Interval))
+                     .between(reservation.reservation_time, end_time))
                 )
             )
             existing_reservations = existing_reservations.scalars().all()
@@ -62,12 +65,22 @@ class ReservationController:
                 await session.commit()
                 await session.refresh(new_reservation)
                 logger.info("The table is reserved.")
+
+                query = select(Reservation).options(selectinload(Reservation.table)).where(Reservation.id == new_reservation.id)
+                result = await session.execute(query)
+                reserv = result.scalars().first()
                 return ReservationDtlInfo(
-                    id=new_reservation.id,
-                    customer_name=new_reservation.customer_name,
-                    reservation_time=new_reservation.reservation_time,
-                    duration_minutes=new_reservation.duration_minutes,
-                    table=TableDtlInfo(id=new_reservation.table_id)
+                    id=reserv.id,
+                    customer_name=reserv.customer_name,
+                    reservation_time=reserv.reservation_time,
+                    duration_minutes=reserv.duration_minutes,
+                    create_at=str(reserv.create_at),
+                    table=TableDtlInfo(
+                        id=reserv.table.id,
+                        name=reserv.table.name,
+                        seats=reserv.table.seats,
+                        location=reserv.table.location,
+                    )
                 )
             except IntegrityError as e:
                 await session.rollback()
@@ -90,6 +103,7 @@ class ReservationController:
                 customer_name=reserv.customer_name,
                 reservation_time=reserv.reservation_time,
                 duration_minutes=reserv.duration_minutes,
+                create_at=str(reserv.create_at),
                 table=TableDtlInfo(
                     id=reserv.table.id,
                     name=reserv.table.name,

@@ -16,3 +16,4 @@ class ReservationIN(ReservationBase):
 class ReservationDtlInfo(ReservationBase):
     id: int
     table: TableDtlInfo
+    create_at: str

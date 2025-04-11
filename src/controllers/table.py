@@ -35,7 +35,7 @@ class TableController:
             id=tbl.id,
             name=tbl.name,
             seats=tbl.seats,
-            location=tbl.location
+            location=tbl.location,
         )
 
 
@@ -52,7 +52,7 @@ class TableController:
                 id=table.id,
                 name=table.name,
                 seats=table.seats,
-                location=table.location
+                location=table.location,
             )
             for table in tables
         ]
