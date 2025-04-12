@@ -9,3 +9,4 @@ class TableIN(BaseModel):
 
 class TableDtlInfo(TableIN):
     id: int
+    create_at: str

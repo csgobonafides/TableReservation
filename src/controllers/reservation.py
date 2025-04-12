@@ -32,7 +32,8 @@ class ReservationController:
             table_exists = await session.execute(
                 select(Table).filter(Table.id == reservation.table_id)
             )
-            if not table_exists.scalars().first():
+            table_info = table_exists.scalars().first()
+            if not table_info:
                 logger.error("Table with the specified ID does not exist.")
                 raise BadRequestError("Table with the specified ID does not exist.")
 
@@ -51,7 +52,7 @@ class ReservationController:
 
             if existing_reservations:
                 logger.error("Table is already reserved for the specified time slot.")
-                raise BadRequestError("Table is already reserved for the specified time slot.")
+                raise NotFoundError("Table is already reserved for the specified time slot.")
 
             new_reservation = Reservation(
                 customer_name=reservation.customer_name,
@@ -64,22 +65,22 @@ class ReservationController:
             try:
                 await session.commit()
                 await session.refresh(new_reservation)
+                await session.refresh(table_info)
+
                 logger.info("The table is reserved.")
 
-                query = select(Reservation).options(selectinload(Reservation.table)).where(Reservation.id == new_reservation.id)
-                result = await session.execute(query)
-                reserv = result.scalars().first()
                 return ReservationDtlInfo(
-                    id=reserv.id,
-                    customer_name=reserv.customer_name,
-                    reservation_time=reserv.reservation_time,
-                    duration_minutes=reserv.duration_minutes,
-                    create_at=str(reserv.create_at),
+                    id=new_reservation.id,
+                    customer_name=new_reservation.customer_name,
+                    reservation_time=new_reservation.reservation_time,
+                    duration_minutes=new_reservation.duration_minutes,
+                    create_at=new_reservation.create_at.isoformat(),
                     table=TableDtlInfo(
-                        id=reserv.table.id,
-                        name=reserv.table.name,
-                        seats=reserv.table.seats,
-                        location=reserv.table.location,
+                        id=table_info.id,
+                        name=table_info.name,
+                        seats=table_info.seats,
+                        location=table_info.location,
+                        create_at=table_info.create_at.isoformat()
                     )
                 )
             except IntegrityError as e:
@@ -108,7 +109,8 @@ class ReservationController:
                     id=reserv.table.id,
                     name=reserv.table.name,
                     seats=reserv.table.seats,
-                    location=reserv.table.location
+                    location=reserv.table.location,
+                    create_at=reserv.table.create_at.isoformat()
                 )
             )
             for reserv in reservations

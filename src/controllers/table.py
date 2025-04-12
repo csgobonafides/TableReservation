@@ -29,13 +29,14 @@ class TableController:
                 await session.refresh(tbl)
             except IntegrityError:
                 logger.error(f"Attempting to add an existing table: {table.name}")
-                raise NotFoundError("An object with this name already exists.")
+                raise BadRequestError("An object with this name already exists.")
 
         return TableDtlInfo(
             id=tbl.id,
             name=tbl.name,
             seats=tbl.seats,
             location=tbl.location,
+            create_at=tbl.create_at.isoformat()
         )
 
 
@@ -53,6 +54,7 @@ class TableController:
                 name=table.name,
                 seats=table.seats,
                 location=table.location,
+                create_at=table.create_at.isoformat()
             )
             for table in tables
         ]
