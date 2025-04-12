@@ -2,7 +2,7 @@
 
 services:
   tablereservation:
-    container_name: app
+    container_name: TR
     build: ./
     env_file:
       - .env
