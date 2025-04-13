@@ -1,4 +1,4 @@
-<﻿h1>TableReservation</h1>
+<h1>TableReservation</h1>
 
 <h3>Методы API.</h3>
 
