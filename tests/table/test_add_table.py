@@ -9,11 +9,11 @@ from db.models import Table
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("prepare_table")
 async def test_add_table_201(xclient: AsyncClient, test_db: DatabaseConnector):
-    payload = {"name": "table1", "seats": 2, "location": "location"}
+    payload = {"name": "table3", "seats": 4, "location": "location"}
     response = await xclient.post("/table/", json=payload)
     assert response.status_code == 201
     data = response.json()
-    assert data == {"id": ANY, "name":"table1", "seats": 2, "location": "location", 'create_at': ANY}
+    assert data == {"id": ANY, "name":"table3", "seats": 4, "location": "location", 'create_at': ANY}
     async with test_db.session_maker() as session:
         table_db = await session.get(Table, data["id"])
         assert table_db.name == data["name"]

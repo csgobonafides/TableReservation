@@ -15,11 +15,11 @@ async def test_get_reservation_200(xclient: AsyncClient, tables: Table, reservat
             'create_at': ANY,
             'customer_name': "user",
             'duration_minutes': 5,
-            'id': 1,
+            'id': 2,
             'reservation_time': ANY,
             'table': {
                 'create_at': ANY,
-                'id': 1,
+                'id': 2,
                 'location': "location1",
                 'name': "table",
                 'seats': 1
@@ -29,11 +29,11 @@ async def test_get_reservation_200(xclient: AsyncClient, tables: Table, reservat
             'create_at': ANY,
             'customer_name': "user2",
             'duration_minutes': 5,
-            'id': 2,
+            'id': 3,
             'reservation_time': ANY,
             'table': {
                 'create_at': ANY,
-                'id': 1,
+                'id': 2,
                 'location': "location1",
                 'name': "table",
                 'seats': 1

@@ -15,7 +15,7 @@ async def test_add_reservation_201(xclient: AsyncClient, test_db: DatabaseConnec
         "customer_name": "user",
         "reservation_time": datetime(2024, 6, 15, 12, 0, tzinfo=timezone.utc).isoformat(),
         "duration_minutes": 5,
-        "table_id": 1
+        "table_id": 2
     }
     response = await xclient.post("/reservation/", json=payload)
     assert response.status_code == 201
@@ -27,7 +27,7 @@ async def test_add_reservation_201(xclient: AsyncClient, test_db: DatabaseConnec
         "duration_minutes": 5,
         "create_at": ANY,
         "table": {
-            "id": 1,
+            "id": 2,
             "create_at": ANY,
             "name": "table",
             "seats": 1,

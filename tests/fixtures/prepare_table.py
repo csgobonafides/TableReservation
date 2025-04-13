@@ -10,11 +10,13 @@ from db.models import Table
 def tables() -> list[Table]:
     return [
         Table(
+            id=2,
             name="table",
             seats=1,
             location="location1"
     ),
         Table(
+            id=3,
             name="table2",
             seats=1,
             location="location2"

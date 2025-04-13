@@ -12,14 +12,14 @@ async def test_get_table_200(xclient: AsyncClient, tables: Table):
     assert response.status_code == 200
     assert response.json() == [
         {
-            "id": 1,
+            "id": 2,
             "name": "table",
             "seats": 1,
             "location": "location1",
             "create_at": ANY
         },
         {
-            "id": 2,
+            "id": 3,
             "name": "table2",
             "seats": 1,
             "location": "location2",
